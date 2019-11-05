@@ -1,0 +1,31 @@
+#################################################################
+#                                                               #
+#         Expanding NetApp Volume and vCenter Datastore         #
+#                                                               #
+#################################################################
+#                                                               #
+#     This code is released as Creative Commons BY-SA. This     #
+#   playbook was created for the Insight Tech Tuesday webinar   #
+#   on 11/5/2019. The configurations in this playbook do not    #
+#    represent Insights reccomended practices. This playbook    #
+#     was created simply to demonstrate the capabilities of     #
+#     Ansible and Ansible Tower. To request support of this     #
+#    playbook, or for further information on how Insight can    #
+#      assist with your automation needs, please reach out      #
+#                  to your account executive.                   #
+#                                                               #
+#################################################################
+
+---
+- name: Expanding NetApp Volume and vCenter Datastore
+  hosts: localhost
+  connection: local
+  vars:
+    requested_space: '{{ (number_of_vms * 110)|int }}'
+  tasks:
+   - name: Expand NFS Volume
+     na_ontap_command:
+       hostname: '{{ netapp_hostname }}'
+       username: '{{ netapp_username }}'
+       password: '{{ netapp_password }}'
+       command: ['volume modify -vserver {{ svm_name }} -volume {{ datastore_name }} -size {{ requested_space }}g']

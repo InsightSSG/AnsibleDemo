@@ -1,0 +1,41 @@
+#################################################################
+#                                                               #
+#                      Mounting NFS Datastores                  #
+#                                                               #
+#################################################################
+#                                                               #
+#     This code is released as Creative Commons BY-SA. This     #
+#   playbook was created for the Insight Tech Tuesday webinar   #
+#   on 11/5/2019. The configurations in this playbook do not    #
+#    represent Insights reccomended practices. This playbook    #
+#     was created simply to demonstrate the capabilities of     #
+#     Ansible and Ansible Tower. To request support of this     #
+#    playbook, or for further information on how Insight can    #
+#      assist with your automation needs, please reach out      #
+#                  to your account executive.                   #
+#                                                               #
+#################################################################
+
+---
+- name: Mount Datastores
+  hosts: all
+  connection: local
+  gather_facts: no
+  tasks:
+  - name: Mount NFS datastores to ESXi Hosts
+    vmware_host_datastore:
+        hostname: '{{ vcenter_hostname }}'
+        username: '{{ vcenter_username }}'
+        password: '{{ vcenter_password }}'
+        datastore_name: '{{ item.name }}'
+        datastore_type: '{{ item.type }}'
+        nfs_server: '{{ item.server }}'
+        nfs_path: '{{ item.path }}'
+        nfs_ro: no
+        esxi_hostname: '{{ inventory_hostname }}'
+        state: present
+        validate_certs: no
+    delegate_to: localhost
+    loop:
+        - { 'name': '{{ svm_name }}_NFS_1', 'server': '{{ nfs_a_ip }}', 'path': '/{{ svm_name }}_NFS_Vol01', 'type': 'nfs'}
+        - { 'name': '{{ svm_name }}_NFS_2', 'server': '{{ nfs_b_ip }}', 'path': '/{{ svm_name }}_NFS_Vol02', 'type': 'nfs'}

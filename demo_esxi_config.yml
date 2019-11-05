@@ -1,0 +1,52 @@
+#################################################################
+#                                                               #
+#      Adding Secondary NFS vmkernal port to ESXi CLuster       #
+#                                                               #
+#################################################################
+#                                                               #
+#     This code is released as Creative Commons BY-SA. This     #
+#   playbook was created for the Insight Tech Tuesday webinar   #
+#   on 11/5/2019. The configurations in this playbook do not    #
+#    represent Insights reccomended practices. This playbook    #
+#     was created simply to demonstrate the capabilities of     #
+#     Ansible and Ansible Tower. To request support of this     #
+#    playbook, or for further information on how Insight can    #
+#      assist with your automation needs, please reach out      #
+#                  to your account executive.                   #
+#                                                               #
+#################################################################
+
+---
+- name: Add NFS IP to vSwitch
+  hosts: all
+  connection: local
+  gather_facts: no
+  tasks:
+  - name: Add NFS VM Portgroup to specific hosts
+    vmware_portgroup:
+      hostname: '{{ vcenter_hostname }}'
+      username: '{{ vcenter_username }}'
+      password: '{{ vcenter_password }}'
+      hosts: '{{ inventory_hostname }}'
+      switch_name: '{{ vsw0_switchname }}'
+      portgroup_name: '{{ vsw0_pgvlan2name }}'
+      vlan_id: '{{ vsw0_pgvlan2 }}'
+      validate_certs: no
+      state: present
+  - name: Create NFS vmkernel port
+    vmware_vmkernel:
+      hostname: '{{ vcenter_hostname }}'
+      username: '{{ vcenter_username }}'
+      password: '{{ vcenter_password }}'
+      esxi_hostname: '{{ inventory_hostname }}'
+      portgroup_name: '{{ vsw0_pgvlan2name }}'
+      network:
+        type: 'static'
+        ip_address: '{{ nfsip }}'
+        subnet_mask: '{{ vsw0_vmk2sub }}'
+      vswitch_name: '{{ vsw0_switchname }}'
+      mtu: 1500
+      enable_mgmt: false
+      enable_vmotion: false
+      state: present
+      validate_certs: no
