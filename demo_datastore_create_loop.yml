@@ -1,0 +1,41 @@
+#################################################################
+#                                                               #
+#            Mounting NFS Datastores with Variable Loop         #
+#                                                               #
+#################################################################
+#                                                               #
+#     This code is released as Creative Commons BY-SA. This     #
+#   playbook was created for the Insight Tech Tuesday webinar   #
+#   on 11/5/2019. The configurations in this playbook do not    #
+#    represent Insights reccomended practices. This playbook    #
+#     was created simply to demonstrate the capabilities of     #
+#     Ansible and Ansible Tower. To request support of this     #
+#    playbook, or for further information on how Insight can    #
+#      assist with your automation needs, please reach out      #
+#                  to your account executive.                   #
+#                                                               #
+#################################################################
+
+---
+- name: Mount Datastores with Variable Loop
+  hosts: all
+  connection: local
+  gather_facts: no
+  tasks:
+  - name: Mount NFS datastores to ESXi Hosts with Variable Loop
+    vmware_host_datastore:
+      hostname: '{{ vcenter_hostname }}'
+      username: '{{ vcenter_username }}'
+      password: '{{ vcenter_password }}'
+      datastore_name: '{{ name }}_0{{ item }}'
+      datastore_type: 'nfs'
+      nfs_server: '{{ nfs_a_ip }}'
+      nfs_path: '/{{ name }}_0{{ item }}'
+      nfs_ro: no
+      esxi_hostname: '{{ inventory_hostname }}'
+      state: present
+      validate_certs: no
+    delegate_to: localhost
+    loop: '{{ range(1, num_of_vols + 1)|list }}'
+    loop_control:
+      index_var: loop_idx
